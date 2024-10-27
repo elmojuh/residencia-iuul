@@ -17,6 +17,14 @@ class Vertice {
         return this.#y;
     }
 
+    set x(x) {
+        this.#x = x;
+    }
+
+    set y(y) {
+        this.#y = y;
+    }
+
     // Metodo que retorna a distância entre dois vértices. d(a, b) = sqrt((xa - xb)^2 + (ya - yb)^2)
     // Distancia de do vertice A para o vertice B. A sendo (v1.x, v1.y) e B sendo (v2.x, v2.y)
     // get distancia retorna uma funcao anonima que espera um parametro v que é um objeto do tipo Vertice
@@ -29,8 +37,8 @@ class Vertice {
     }
 
     move(x,y){
-        this.#x = x;
-        this.#y = y;
+        this.x = x;
+        this.y = y;
     }
 }
 
@@ -50,9 +58,9 @@ function main(){
 
 // Testes da leitura do usuário
     console.log("distancia - Testando a distância");
-    console.log(`Teste de distancia entre o vertice A (${vA}) e vertice B(${vB}). Disntancia de: ${vA.distancia(vB)}`);
-    console.log(`Teste de distancia entre o vertice B (${vB}) e vertice C(${vC}). Disntancia de: ${vB.distancia(vC)}`);
-    console.log(`Teste de distancia entre o vertice C (${vC}) e vertice A(${vA}). Disntancia de: ${vC.distancia(vA)}`);
+    console.log(`Teste de distancia entre o vertice A(${vA.x}, ${vA.y}) e vertice B(${vB.x}, ${vB.y}). Disntancia de: ${vA.distancia(vB)}`);
+    console.log(`Teste de distancia entre o vertice B(${vB.x}, ${vB.y} e vertice C(${vC.x}, ${vC.y}). Disntancia de: ${vB.distancia(vC)}`);
+    console.log(`Teste de distancia entre o vertice C(${vC.x}, ${vC.y}) e vertice A(${vA.x}, ${vA.y}). Disntancia de: ${vC.distancia(vA)}`);
 
     console.log("equals - Testando se são iguais");
     let vD = new Vertice(0, 0);
@@ -62,3 +70,5 @@ function main(){
     console.log(`Teste do vertice B (${vB.x} e ${vB.y}) com o vertice C(${vC.x} e ${vC.y}): ${vB.equals(vC)}`);
     console.log(`Teste do vertice C (${vC.x} e ${vC.y}) com o vertice A(${vA.x} e ${vA.y}): ${vC.equals(vA)}`);
 }
+
+main();
