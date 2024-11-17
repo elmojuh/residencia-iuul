@@ -3,6 +3,7 @@ import { PacienteService } from '../services/PacienteService';
 import { AgendaService } from '../services/AgendaService';
 import { Paciente } from '../models/Paciente';
 import { CPF } from '../models/CPF';
+import {Consulta} from "../models/Consulta";
 
 const prompt = promptSync();
 const agendaService = new AgendaService();
@@ -161,5 +162,11 @@ function popularDados() {
     ];
     pacientes.forEach(p => pacienteService.adicionarPaciente(p));
 
-    agendaService.agendarConsulta("12345678912", new Date("2025-12-01"), "14:00", "14:30");
+    const agenda = [
+        new Consulta(pacientes[0], new Date("2024-12-25"), "14:00", "14:30"),
+        new Consulta(pacientes[1], new Date("2024-12-25"), "14:30", "15:00"),
+        new Consulta(pacientes[2], new Date("2024-12-25"), "15:00", "15:30"),
+        new Consulta(pacientes[3], new Date("2024-12-25"), "15:30", "16:00"),
+    ];
+    agenda.forEach(c => agendaService.agendarConsulta(c.paciente.cpf.valor, c.dataConsulta, c.inicio, c.fim));
 }
