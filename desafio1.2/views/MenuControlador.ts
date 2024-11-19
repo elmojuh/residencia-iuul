@@ -5,6 +5,7 @@ import { Paciente } from '../models/Paciente';
 import { CPF } from '../models/CPF';
 import {Consulta} from "../models/Consulta";
 
+const fazerPopulacaoDeDados: boolean = true;
 const prompt = promptSync();
 const agendaService = new AgendaService();
 const pacienteService = new PacienteService();
@@ -14,7 +15,7 @@ agendaService.setPacienteService(pacienteService);
 pacienteService.setAgendaService(agendaService);
 
 export function menuPrincipal() {
-    popularDados();
+    podePopular();
     while (true) {
         console.log("\nMenu Principal");
         console.log("1 - Cadastro de pacientes");
@@ -56,15 +57,8 @@ function cadastrarPaciente() {
         const cpfObj = new CPF(cpf);
         const dataNascimentoDate = new Date(dataNascimento.split('/').reverse().join('-'));
 
-        // Verificar a idade
-        const idade = new Date().getFullYear() - dataNascimentoDate.getFullYear();
-        if (idade < 13) {
-            throw new Error("Erro: paciente deve ter pelo menos 13 anos.");
-        }
-
         const paciente = new Paciente(nome, cpfObj, dataNascimentoDate);
         pacienteService.adicionarPaciente(paciente);
-        console.log("Paciente cadastrado com sucesso!");
     } catch (error) {
         console.log(error.message);
     }
@@ -74,28 +68,55 @@ function excluirPaciente() {
     const cpf = prompt("CPF: ");
     try {
         pacienteService.excluirPaciente(cpf);
-        console.log("Paciente excluído com sucesso!");
     } catch (error) {
         console.log(error.message);
     }
 }
 
+function formatarColunas(dados: string[], tamanhos: number[]): string {
+    return dados
+        .map((dado, i) => dado.padEnd(tamanhos[i]))
+        .join(" ");
+}
+
 function listarPacientesPorCPF() {
     const pacientes = pacienteService.listarPacientesPorCPF();
-    console.log("------------------------------------------------------------");
-    console.log("CPF Nome Dt.Nasc. Idade");
-    console.log("------------------------------------------------------------");
-    console.log(pacientes.map(p => `${p.cpf.valor} ${p.nome} ${p.dataNascimento.toLocaleDateString()} ${new Date().getFullYear() - p.dataNascimento.getFullYear()}`));
-    console.log("------------------------------------------------------------");
+    const tamanhosColunas = [20, 25, 12, 5]; // Tamanhos para CPF, Nome, Data de Nasc., Idade
+    console.log("--------------------------------------------------------------------");
+    console.log(formatarColunas(["CPF", "Nome", "Dt. Nasc.", "Idade"], tamanhosColunas));
+    console.log("--------------------------------------------------------------------");
+    pacientes.forEach(paciente => {
+        console.log(formatarColunas(
+            [
+                paciente.cpf.valor,
+                paciente.nome,
+                paciente.dataNascimento.toLocaleDateString(),
+                (new Date().getFullYear() - paciente.dataNascimento.getFullYear()).toString(),
+            ],
+            tamanhosColunas
+        ));
+    });
+    console.log("--------------------------------------------------------------------");
 }
 
 function listarPacientesPorNome() {
     const pacientes = pacienteService.listarPacientesPorNome();
-    console.log("------------------------------------------------------------");
-    console.log("CPF Nome Dt.Nasc. Idade");
-    console.log("------------------------------------------------------------");
-    console.log(pacientes.map(p => `${p.cpf.valor} ${p.nome} ${p.dataNascimento.toLocaleDateString()} ${new Date().getFullYear() - p.dataNascimento.getFullYear()}`));
-    console.log("------------------------------------------------------------");
+    const tamanhosColunas = [20, 25, 12, 5]; // Tamanhos para CPF, Nome, Data de Nasc., Idade
+    console.log("--------------------------------------------------------------------");
+    console.log(formatarColunas(["CPF", "Nome", "Dt. Nasc.", "Idade"], tamanhosColunas));
+    console.log("--------------------------------------------------------------------");
+    pacientes.forEach(paciente => {
+        console.log(formatarColunas(
+            [
+                paciente.cpf.valor,
+                paciente.nome,
+                paciente.dataNascimento.toLocaleDateString(),
+                (new Date().getFullYear() - paciente.dataNascimento.getFullYear()).toString(),
+            ],
+            tamanhosColunas
+        ));
+    });
+    console.log("--------------------------------------------------------------------");
 }
 
 function menuAgenda() {
@@ -123,7 +144,6 @@ function agendarConsulta() {
 
     try {
         agendaService.agendarConsulta(cpf, new Date(data.split('/').reverse().join('-')), inicio, fim);
-        console.log("Agendamento realizado com sucesso!");
     } catch (error) {
         console.log(error.message);
     }
@@ -135,22 +155,64 @@ function cancelarConsulta() {
     const inicio = prompt("Hora de início (HHMM): ");
     try {
         agendaService.cancelarConsulta(cpf, new Date(data.split('/').reverse().join('-')), inicio);
-        console.log("Agendamento cancelado com sucesso!");
     } catch (error) {
         console.log(error.message);
     }
 }
 
 function listarAgenda() {
-    const consultas = agendaService.listarAgenda();
-    console.log("Apresentar a agenda T-Toda ou P-Periodo: P");
-    const dataInicio = prompt("Data inicial: ");
-    const dataFim = prompt("Data final: ");
-    console.log("-------------------------------------------------------------");
-    console.log("Data H.Ini H.Fim Tempo Nome Dt.Nasc.");
-    console.log("-------------------------------------------------------------");
-    console.log(consultas.map(c => `${c.dataConsulta.toLocaleDateString()} ${c.inicio} ${c.fim} ${parseInt(c.fim) - parseInt(c.inicio)} ${c.paciente.nome} ${c.paciente.dataNascimento.toLocaleDateString()}`));
-    console.log("-------------------------------------------------------------");
+    const opcao = prompt("Escolha T para Toda ou P para Período: ").toUpperCase();
+
+    let consultas: Consulta[] = [];
+    if (opcao === "T") {
+        consultas = agendaService.listarAgenda();
+    } else if (opcao === "P") {
+        const dataInicio = prompt("Data inicial (DD/MM/AAAA): ");
+        const dataFim = prompt("Data final (DD/MM/AAAA): ");
+        const dataInicioDate = new Date(dataInicio.split('/').reverse().join('-'));
+        const dataFimDate = new Date(dataFim.split('/').reverse().join('-'));
+        consultas = agendaService.listarAgenda(dataInicioDate, dataFimDate);
+    } else {
+        console.log("Opção inválida.");
+        return;
+    }
+
+    if (consultas.length === 0) {
+        console.log("Nenhuma consulta encontrada.");
+        return;
+    }
+
+    const tamanhosColunas = [12, 6, 6, 5, 25, 12]; // Tamanhos para Data, H.Ini, H.Fim, Tempo, Nome, Dt.Nasc.
+    console.log("-----------------------------------------------------------------------");
+    console.log(formatarColunas(["Data", "H.Ini", "H.Fim", "Tempo", "Nome", "Dt.Nasc."], tamanhosColunas));
+    console.log("-----------------------------------------------------------------------");
+    consultas.forEach(consulta => {
+        const tempo = parseInt(consulta.fim) - parseInt(consulta.inicio); // Cálculo do tempo em minutos
+        console.log(formatarColunas(
+            [
+                consulta.dataConsulta.toLocaleDateString(),
+                consulta.inicio,
+                consulta.fim,
+                tempo.toString(),
+                consulta.paciente.nome,
+                consulta.paciente.dataNascimento.toLocaleDateString(),
+            ],
+            tamanhosColunas
+        ));
+    });
+    console.log("----------------------------------------------------------------------");
+}
+
+// população de dados
+
+function podePopular(){
+    if (fazerPopulacaoDeDados) {
+        popularDados();
+        console.log("POPULAÇÃO DE DADOS ESTÁ HABILITADA, PARA REMOVE-LA ALTERE fazerPopulacaoDeDados NO MenuControlador.");
+    }
+    else {
+        console.log("POPULAÇÃO DE DADOS ESTÁ DESABILITADA, PARA ADICIONA-LA ALTERE fazerPopulacaoDeDados NO MenuControlador.");
+    }
 }
 
 function popularDados() {
@@ -158,7 +220,8 @@ function popularDados() {
         new Paciente("João de Almeira", new CPF("12345678912"), new Date("2000-01-01")),
         new Paciente("Maria Flor", new CPF("98765432109"), new Date("1999-12-31")),
         new Paciente("José Alencar", new CPF("45678912345"), new Date("2001-01-01")),
-        new Paciente("Beatriz", new CPF("11122233344"), new Date("2002-02-10")),
+        new Paciente("Beatriz", new CPF("78912345678"), new Date("2002-02-10")),
+        new Paciente("Carlos Silvio", new CPF("11122233344"), new Date("2002-02-10")),
     ];
     pacientes.forEach(p => pacienteService.adicionarPaciente(p));
 
@@ -169,4 +232,5 @@ function popularDados() {
         new Consulta(pacientes[3], new Date("2024-12-25"), "15:30", "16:00"),
     ];
     agenda.forEach(c => agendaService.agendarConsulta(c.paciente.cpf.valor, c.dataConsulta, c.inicio, c.fim));
+    console.log("Dados populados com sucesso! É possível remove-los com a troca de valor de DADOS = false ");
 }

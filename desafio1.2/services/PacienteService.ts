@@ -27,13 +27,14 @@ export class PacienteService {
     adicionarPaciente(paciente: Paciente): void {
         this.pacienteJaExiste(paciente.cpf.valor);
         this.pacientes.push(paciente);
+        console.log("Paciente cadastrado com sucesso!");
     }
 
     excluirPaciente(cpf: string): void {
         const paciente = this.getPaciente(cpf);
-        console.log('Paciente em excluirPaciente:' ,paciente);
         this.possuiConsultaFutura(paciente);
         this.pacientes = this.pacientes.filter(p => p.cpf.valor !== cpf);
+        console.log("Paciente excluído com sucesso!");
     }
 
     listarPacientesPorCPF(): Paciente[] {
@@ -46,7 +47,6 @@ export class PacienteService {
 
     getPaciente(cpf: string): Paciente {
         const paciente = this.pacientes.find(p => p.cpf.valor === cpf);
-        console.log('Paciente em getPaciente:' ,paciente);
         if (!paciente) {
             throw new Error("Paciente não encontrado");
         }

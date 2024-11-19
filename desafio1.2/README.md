@@ -7,7 +7,7 @@ Pseudo sistema de consultas de pacientes com validações de horários e pacient
 ## Como rodar
 
 Rode o arquivo index.ts
-```run index.ts```
+```npx ts-node index.ts```
 
 ## Sistema é populado automaticamnete
 

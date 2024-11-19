@@ -45,6 +45,7 @@ export class AgendaService {
 
         const consulta = new Consulta(paciente, data, inicio, fim);
         this.agenda.push(consulta);
+        console.log(`Consulta agendada com sucesso para o paciente ${paciente.nome} no dia ${data.toLocaleDateString()} das ${inicio} às ${fim}`);
     }
 
 
@@ -62,6 +63,8 @@ export class AgendaService {
         }
 
         this.agenda = this.agenda.filter(c => c !== consulta);
+
+        console.log(`Agendamento do paciente de cpf: ${cpf} cancelado com sucesso! Horário ${inicio} liberado`);
     }
 
 
@@ -81,7 +84,7 @@ export class AgendaService {
             ((parseInt(inicio) >= parseInt(c.inicio) && parseInt(inicio) < parseInt(c.fim)) ||
                 (parseInt(fim) > parseInt(c.inicio) && parseInt(fim) <= parseInt(c.fim)))
         )) {
-            throw new Error("Há agendamento sobreposto.");
+            throw new Error("Já existe uma consulta agendada nesse horário");
         }
     }
 }
